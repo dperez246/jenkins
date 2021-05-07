@@ -9,15 +9,17 @@ pipeline {
                   echo "build"
                 }
             }
-            stages {
+            stage {
                 stage('Build') {
                     steps {
-                        sh 'yarn install'
+                        /*sh 'yarn install'*/
+                        echo 'yarn install'
                     }
                 }
                 stage('Lint') {
                     steps {
-                        sh 'yarn lint'
+                        echo "yarn lint"
+                        /*sh 'yarn lint'*/
                     }
                 }
             }
