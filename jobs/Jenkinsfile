@@ -1,23 +1,36 @@
-import groovy.json.JsonSlurperClassic
-
-def jsonParse(def json) {
-    new groovy.json.JsonSlurperClassic().parseText(json)
-}
 pipeline {
   agent { label 'master' }
   environment {
     appName = "variable" 
   }
   stages {
-
- stage("paso 1"){
-     
-      steps {
-          script {			
-           sh "echo 'hola mundo'"
+    stage('Notify') {
+            when { anyOf { branch 'develop'; branch 'demo' } }
+            steps {
+                slackSend( channel: "#tramiteya", color: '#FFFF00', message: ":crossed_fingers::skin-tone-5: STARTED: Build ${env.JOB_NAME} [${env.BUILD_NUMBER}] (<${env.RUN_DISPLAY_URL}|Open>)")
+            }
         }
-      }
-    }
+        stage('Prepare Build') {
+            agent {
+                docker {
+                    image 'darkj24/node-gyp-compatible:1.0'
+                    args '-v $HOME/docker-images-cached:/root/docker-images-cached'
+                }
+            }
+            stages {
+                stage('Build') {
+                    steps {
+                        sh 'yarn install'
+                    }
+                }
+                stage('Lint') {
+                    steps {
+                        sh 'yarn lint'
+                    }
+                }
+            }
+        }
+
   }
   post {
       always {          
@@ -34,4 +47,7 @@ pipeline {
       
   }
 }  
+
+
+
 
